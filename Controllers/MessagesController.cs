@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using Microsoft.Bot.Connector;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using SimpleBot.Logic;
 
 namespace SimpleBot
@@ -20,13 +22,13 @@ namespace SimpleBot
             if (g_bot == null)
             {
                 g_bot = new SimpleBotUser();
-            }
+            }   
         }
 
         [ResponseType(typeof(void))]
         public virtual async Task<HttpResponseMessage> Post([FromBody] Activity activity)
         {
-            if ( activity != null && activity.Type == ActivityTypes.Message)
+            if (activity != null && activity.Type == ActivityTypes.Message)
             {
                 await HandleActivityAsync(activity);
             }
@@ -39,7 +41,7 @@ namespace SimpleBot
         async Task HandleActivityAsync(Activity activity)
         {
             string text = activity.Text;
-            string userFromId = activity.From.Id;
+            string userFromId = activity.From.Id;           
             string userFromName = activity.From.Name;
 
             var message = new SimpleMessage(userFromId, userFromName, text);
@@ -47,7 +49,9 @@ namespace SimpleBot
             string response = g_bot.Reply(message);
 
             await ReplyUserAsync(activity, response);
-        }
+
+            g_bot.SaveData(message);
+        }   
 
         // Responde mensagens usando o Bot Framework Connector
         async Task ReplyUserAsync(Activity message, string text)
