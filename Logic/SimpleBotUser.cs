@@ -35,9 +35,25 @@ namespace SimpleBot.Logic
             };
 
             col.InsertOne(doc);
-
+         
             profile = GetProfile(message.Id);
+            profile.Contador += 1; 
+            SetProfile(profile);
 
+        }
+
+        private void SetProfile(UserProfile profile)
+        {
+            MongoClient client;
+            IMongoDatabase db;
+            IMongoCollection<BsonDocument> col;      
+
+
+            client = new MongoClient();
+            db = client.GetDatabase("SimpleBot");
+            col = db.GetCollection<BsonDocument>("UserProfile");
+
+            //Update
         }
 
         private UserProfile GetProfile(string id)
@@ -62,9 +78,16 @@ namespace SimpleBot.Logic
                     Contador = int.Parse(bsonElements[1].ToString())
                 };
             }
+            else
+            {
+                profile = new UserProfile
+                {
+                    Id = id,
+                    Contador = 0
+                };
+            }
 
-            return profile ?? new UserProfile();
-
+            return profile;
         }
     }
 }
